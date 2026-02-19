@@ -15,6 +15,10 @@ router.post('/reset-password', validate(authValidation.resetPassword), authContr
 router.post('/send-verification-email', auth(), authController.sendVerificationEmail);
 router.post('/verify-email', validate(authValidation.verifyEmail), authController.verifyEmail);
 
+router.post('/social-login', validate(authValidation.socialLogin), authController.socialLogin);
+router.get('/profile', auth(), authController.getProfile);
+router.put('/address', auth(), authController.updateAddress);
+
 module.exports = router;
 
 /**

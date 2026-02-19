@@ -47,6 +47,22 @@ const verifyEmail = catchAsync(async (req, res) => {
   res.status(httpStatus.NO_CONTENT).send();
 });
 
+const socialLogin = catchAsync(async (req, res) => {
+  const { email, fullName, mobile } = req.body;
+  const user = await userService.upsertUserByEmail({ email, fullName, mobile });
+  const tokens = await tokenService.generateAuthTokens(user);
+  res.send({ user, tokens });
+});
+
+const getProfile = catchAsync(async (req, res) => {
+  res.send(req.user);
+});
+
+const updateAddress = catchAsync(async (req, res) => {
+  const user = await userService.updateUserById(req.user.id, { addresses: req.body });
+  res.send(user.addresses);
+});
+
 module.exports = {
   register,
   login,
@@ -56,4 +72,7 @@ module.exports = {
   resetPassword,
   sendVerificationEmail,
   verifyEmail,
+  socialLogin,
+  getProfile,
+  updateAddress,
 };

@@ -5,7 +5,16 @@ const register = {
   body: Joi.object().keys({
     email: Joi.string().required().email(),
     password: Joi.string().required().custom(password),
-    name: Joi.string().required(),
+    fullName: Joi.string().required(),
+    mobile: Joi.string().required(),
+  }),
+};
+
+const socialLogin = {
+  body: Joi.object().keys({
+    email: Joi.string().required().email(),
+    fullName: Joi.string().required(),
+    mobile: Joi.string().required(),
   }),
 };
 
@@ -57,4 +66,5 @@ module.exports = {
   forgotPassword,
   resetPassword,
   verifyEmail,
+  socialLogin,
 };

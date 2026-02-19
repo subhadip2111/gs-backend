@@ -79,6 +79,22 @@ const deleteUserById = async (userId) => {
   return user;
 };
 
+/**
+ * Upsert user by email (for social login)
+ * @param {Object} userBody
+ * @returns {Promise<User>}
+ */
+const upsertUserByEmail = async (userBody) => {
+  let user = await getUserByEmail(userBody.email);
+  if (user) {
+    Object.assign(user, userBody);
+    await user.save();
+  } else {
+    user = await User.create(userBody);
+  }
+  return user;
+};
+
 module.exports = {
   createUser,
   queryUsers,
@@ -86,4 +102,5 @@ module.exports = {
   getUserByEmail,
   updateUserById,
   deleteUserById,
+  upsertUserByEmail,
 };
