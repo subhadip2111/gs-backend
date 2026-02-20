@@ -18,11 +18,12 @@ const userSchema = mongoose.Schema(
         }
       },
     },
-
+    socialId: { type: String },
+    avatar: { type: String },
 
     fullName: { type: String, required: true },
-    mobile: { type: String, required: true },
-    role: { type: String, enum: ['customer', 'admin'], default: 'customer' },
+    mobile: { type: String },
+    role: { type: String, enum: ['user', 'admin'], default: 'user' },
     addresses: [{
       label: String,
       fullName: String,

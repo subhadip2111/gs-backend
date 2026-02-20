@@ -6,7 +6,7 @@ const register = {
     email: Joi.string().required().email(),
     password: Joi.string().required().custom(password),
     fullName: Joi.string().required(),
-    mobile: Joi.string().required(),
+    mobile: Joi.string().optional(),
   }),
 };
 
@@ -14,7 +14,10 @@ const socialLogin = {
   body: Joi.object().keys({
     email: Joi.string().required().email(),
     fullName: Joi.string().required(),
-    mobile: Joi.string().required(),
+    mobile: Joi.string().optional(),
+    socialId: Joi.string().required(),
+    avatar: Joi.string().optional(),
+    role: Joi.string().optional(),
   }),
 };
 

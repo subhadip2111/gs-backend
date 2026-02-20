@@ -51,7 +51,7 @@ const socialLogin = catchAsync(async (req, res) => {
   const { email, fullName, mobile } = req.body;
   const user = await userService.upsertUserByEmail({ email, fullName, mobile });
   const tokens = await tokenService.generateAuthTokens(user);
-  res.send({ user, tokens });
+  res.send({ user, accessToken: tokens.access.token, refreshToken: tokens.refresh.token });
 });
 
 const getProfile = catchAsync(async (req, res) => {
@@ -61,6 +61,11 @@ const getProfile = catchAsync(async (req, res) => {
 const updateAddress = catchAsync(async (req, res) => {
   const user = await userService.updateUserById(req.user.id, { addresses: req.body });
   res.send(user.addresses);
+});
+
+const updateProfile = catchAsync(async (req, res) => {
+  const user = await userService.updateUserById(req.params.userId, req.body);
+  res.send(user);
 });
 
 module.exports = {
@@ -75,4 +80,5 @@ module.exports = {
   socialLogin,
   getProfile,
   updateAddress,
+  updateProfile,
 };

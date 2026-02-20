@@ -20,6 +20,7 @@ router.post('/verify-email', validate(authValidation.verifyEmail), authControlle
 router.post('/social-login', validate(authValidation.socialLogin), authController.socialLogin);
 router.get('/profile', auth(), authController.getProfile);
 router.put('/address', auth(), authController.updateAddress);
+router.patch('/profile/:userId', auth(), authController.updateProfile);
 
 module.exports = router;
 
