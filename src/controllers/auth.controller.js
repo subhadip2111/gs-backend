@@ -50,12 +50,14 @@ const verifyEmail = catchAsync(async (req, res) => {
 const socialLogin = catchAsync(async (req, res) => {
   const { email, fullName, mobile } = req.body;
   const user = await userService.upsertUserByEmail({ email, fullName, mobile });
+  console.log(user);
   const tokens = await tokenService.generateAuthTokens(user);
   res.send({ user, accessToken: tokens.access.token, refreshToken: tokens.refresh.token });
 });
 
 const getProfile = catchAsync(async (req, res) => {
-  res.send(req.user);
+  const user = await userService.getUserById(req.user.id);
+  res.send(user);
 });
 
 const updateAddress = catchAsync(async (req, res) => {

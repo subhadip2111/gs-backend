@@ -22,7 +22,7 @@ const userSchema = mongoose.Schema(
     avatar: { type: String },
 
     fullName: { type: String, required: true },
-    mobile: { type: String },
+    mobile: { type: String,default:'' },
     role: { type: String, enum: ['user', 'admin'], default: 'user' },
     addresses: [{
       label: String,

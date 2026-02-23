@@ -34,7 +34,7 @@ const queryUsers = async (filter, options) => {
  * @returns {Promise<User>}
  */
 const getUserById = async (id) => {
-  return User.findById(id);
+  return await User.findById(id).select('');
 };
 
 /**
@@ -43,7 +43,8 @@ const getUserById = async (id) => {
  * @returns {Promise<User>}
  */
 const getUserByEmail = async (email) => {
-  return User.findOne({ email });
+
+  return await User.findOne({ email });
 };
 
 /**
@@ -60,6 +61,7 @@ const updateUserById = async (userId, updateBody) => {
   if (updateBody.email && (await User.isEmailTaken(updateBody.email, userId))) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
   }
+  console.log(updateBody);
   Object.assign(user, updateBody);
   await user.save();
   return user;
@@ -87,8 +89,7 @@ const deleteUserById = async (userId) => {
 const upsertUserByEmail = async (userBody) => {
   let user = await getUserByEmail(userBody.email);
   if (user) {
-    Object.assign(user, userBody);
-    await user.save();
+    return user;
   } else {
     user = await User.create(userBody);
   }
