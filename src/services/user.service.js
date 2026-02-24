@@ -67,6 +67,20 @@ const updateUserById = async (userId, updateBody) => {
   return user;
 };
 
+const updateUserByEmail = async (email, updateBody) => {
+  const user = await getUserByEmail(email);
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
+  }
+  if (updateBody.email && (await User.isEmailTaken(updateBody.email, user._id))) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
+  }
+  console.log('hfdhdf',updateBody);
+  Object.assign(user, updateBody);
+  await user.save();
+  return user;
+};
+
 /**
  * Delete user by id
  * @param {ObjectId} userId
@@ -104,4 +118,5 @@ module.exports = {
   updateUserById,
   deleteUserById,
   upsertUserByEmail,
+  updateUserByEmail,
 };

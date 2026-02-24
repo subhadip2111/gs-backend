@@ -11,6 +11,23 @@ const register = catchAsync(async (req, res) => {
 const login = catchAsync(async (req, res) => {
   const { email, password } = req.body;
   const user = await authService.loginUserWithEmailAndPassword(email, password);
+  console.log(user);
+  const tokens = await tokenService.generateAuthTokens(user);
+  console.log(tokens);
+  res.send({
+    user,
+   
+    
+      accessToken: tokens.access.token,
+      refreshToken: tokens.refresh.token,
+    
+
+  });
+});
+const adminLogin = catchAsync(async (req, res) => {
+  console.log(req.body);
+  const { email, password } = req.body;
+  const user = await authService.loginUserWithEmailAndPassword(email, password);
   const tokens = await tokenService.generateAuthTokens(user);
   res.send({ user, tokens });
 });
@@ -22,7 +39,7 @@ const logout = catchAsync(async (req, res) => {
 
 const refreshTokens = catchAsync(async (req, res) => {
   const tokens = await authService.refreshAuth(req.body.refreshToken);
-  res.send({accessToken:tokens.access.token,refreshToken:tokens.refresh.token });
+  res.send({ accessToken: tokens.access.token, refreshToken: tokens.refresh.token });
 });
 
 const forgotPassword = catchAsync(async (req, res) => {
@@ -69,6 +86,10 @@ const updateProfile = catchAsync(async (req, res) => {
   const user = await userService.updateUserById(req.params.userId, req.body);
   res.send(user);
 });
+const updateProfilebyEmail = catchAsync(async (req, res) => {
+  const user = await userService.updateUserByEmail(req.body.email, req.body);
+  res.send(user);
+});
 
 module.exports = {
   register,
@@ -83,4 +104,6 @@ module.exports = {
   getProfile,
   updateAddress,
   updateProfile,
+  adminLogin,
+  updateProfilebyEmail
 };
