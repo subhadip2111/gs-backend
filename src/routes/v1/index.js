@@ -8,6 +8,7 @@ const docsRoute = require('./docs.route');
 const categoryRoute = require('./category.route');
 const subCategoryRoute = require('./subcategory.route');
 const bannerRoute = require('./banner.route');
+const uploadRoute = require('./upload.route');
 const config = require('../../config/config');
 
 const router = express.Router();
@@ -44,6 +45,10 @@ const defaultRoutes = [
   {
     path: '/banners',
     route: bannerRoute,
+  },
+  {
+    path: '/upload',
+    route: uploadRoute,
   },
 ];
 

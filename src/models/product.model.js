@@ -6,21 +6,29 @@ const productSchema = mongoose.Schema(
         sku: { type: String, required: true, unique: true },
         name: { type: String, required: true },
         brand: { type: String, required: true },
-        category: { type: String, enum: ['Men', 'Women', 'Kids', 'Accessories'], required: true },
-        subcategory: { type: String, required: true },
+        category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true },
+        subcategory: { type: mongoose.Schema.Types.ObjectId, ref: 'SubCategory', required: true },
         price: { type: Number, required: true },
         originalPrice: { type: Number },
         description: { type: String, required: true },
         images: [{ type: String }],
-        sizes: [{ type: String }],
-        colors: [{ type: String }],
+        variants: [{
+            color: {
+                name: { type: String, required: true },
+                hex: { type: String, required: true },
+            },
+            sizes: [{
+                size: { type: String, required: true },
+                quantity: { type: Number, required: true, default: 0 },
+            }],
+        }],
         fabric: { type: String },
         specifications: [{ type: String }],
         rating: { type: Number, default: 0 },
         reviewsCount: { type: Number, default: 0 },
-        stock: { type: Map, of: Number }, // e.g., { "M": 10, "L": 5 }
         isTrending: { type: Boolean, default: false },
-        isNewArrival: { type: Boolean, default: false }
+        isNewArrival: { type: Boolean, default: false },
+        materialAndCare: [{ type: String }],
     },
     {
         timestamps: true,

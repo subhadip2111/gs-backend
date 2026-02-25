@@ -11,6 +11,9 @@ router
     .post(auth('manageSubCategories'), validate(subCategoryValidation.createSubCategory), subCategoryController.createSubCategory)
     .get(validate(subCategoryValidation.getSubCategories), subCategoryController.getSubCategories);
 
+// GET /subcategories/category/:categoryId — get all subcategories for a given category
+router.get('/category/:categoryId', validate(subCategoryValidation.getSubCategoriesByCategoryId), subCategoryController.getSubCategoriesByCategoryId);
+
 router
     .route('/:subCategoryId')
     .get(validate(subCategoryValidation.getSubCategory), subCategoryController.getSubCategory)

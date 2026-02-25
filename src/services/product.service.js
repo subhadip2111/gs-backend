@@ -8,7 +8,8 @@ const ApiError = require('../utils/ApiError');
  * @returns {Promise<Product>}
  */
 const createProduct = async (productBody) => {
-    return Product.create(productBody);
+    const product = await Product.create(productBody);
+    return product;
 };
 
 /**

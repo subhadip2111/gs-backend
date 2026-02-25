@@ -6,19 +6,31 @@ const createProduct = {
         sku: Joi.string().required(),
         name: Joi.string().required(),
         brand: Joi.string().required(),
-        category: Joi.string().required().valid('Men', 'Women', 'Kids', 'Accessories'),
-        subcategory: Joi.string().required(),
+        category: Joi.string().custom(objectId).required(),
+        subcategory: Joi.string().custom(objectId).required(),
         price: Joi.number().required(),
         originalPrice: Joi.number(),
         description: Joi.string().required(),
         images: Joi.array().items(Joi.string()),
-        sizes: Joi.array().items(Joi.string()),
-        colors: Joi.array().items(Joi.string()),
+        variants: Joi.array().items(
+            Joi.object().keys({
+                color: Joi.object().keys({
+                    name: Joi.string().required(),
+                    hex: Joi.string().required(),
+                }).required(),
+                sizes: Joi.array().items(
+                    Joi.object().keys({
+                        size: Joi.string().required(),
+                        quantity: Joi.number().integer().min(0).required(),
+                    })
+                ),
+            })
+        ),
         fabric: Joi.string(),
         specifications: Joi.array().items(Joi.string()),
-        stock: Joi.object().pattern(Joi.string(), Joi.number()),
         isTrending: Joi.boolean(),
         isNewArrival: Joi.boolean(),
+        materialAndCare: Joi.array().items(Joi.string()),
     }),
 };
 
@@ -49,19 +61,31 @@ const updateProduct = {
             sku: Joi.string(),
             name: Joi.string(),
             brand: Joi.string(),
-            category: Joi.string().valid('Men', 'Women', 'Kids', 'Accessories'),
-            subcategory: Joi.string(),
+            category: Joi.string().custom(objectId),
+            subcategory: Joi.string().custom(objectId),
             price: Joi.number(),
             originalPrice: Joi.number(),
             description: Joi.string(),
             images: Joi.array().items(Joi.string()),
-            sizes: Joi.array().items(Joi.string()),
-            colors: Joi.array().items(Joi.string()),
+            variants: Joi.array().items(
+                Joi.object().keys({
+                    color: Joi.object().keys({
+                        name: Joi.string().required(),
+                        hex: Joi.string().required(),
+                    }).required(),
+                    sizes: Joi.array().items(
+                        Joi.object().keys({
+                            size: Joi.string().required(),
+                            quantity: Joi.number().integer().min(0).required(),
+                        })
+                    ),
+                })
+            ),
             fabric: Joi.string(),
             specifications: Joi.array().items(Joi.string()),
-            stock: Joi.object().pattern(Joi.string(), Joi.number()),
             isTrending: Joi.boolean(),
             isNewArrival: Joi.boolean(),
+            materialAndCare: Joi.array().items(Joi.string()),
         })
         .min(1),
 };

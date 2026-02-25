@@ -16,6 +16,13 @@ const getSubCategories = catchAsync(async (req, res) => {
     res.send(result);
 });
 
+const getSubCategoriesByCategoryId = catchAsync(async (req, res) => {
+    const filter = { category: req.params.categoryId };
+    const options = pick(req.query, ['sortBy', 'limit', 'page']);
+    const result = await subCategoryService.querySubCategories(filter, options);
+    res.send(result);
+});
+
 const getSubCategory = catchAsync(async (req, res) => {
     const subCategory = await subCategoryService.getSubCategoryById(req.params.subCategoryId);
     if (!subCategory) {
@@ -40,4 +47,5 @@ module.exports = {
     getSubCategory,
     updateSubCategory,
     deleteSubCategory,
+    getSubCategoriesByCategoryId
 };

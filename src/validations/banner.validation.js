@@ -3,18 +3,26 @@ const { objectId } = require('./custom.validation');
 
 const createBanner = {
     body: Joi.object().keys({
-        type: Joi.string().valid('banner', 'popup', 'sidebar').default('banner'),
-        imageUrl: Joi.string().uri().required(),
+        type: Joi.string().valid('banner', 'popup', 'sidebar','brands').default('banner'),
+        imageUrl: Joi.string().uri().optional(),
         title: Joi.string().required(),
         subtitle: Joi.string(),
         description: Joi.string(),
         ctaText: Joi.string(),
         ctaLink: Joi.string(),
+        // make it value as optional
+        brands: Joi.array().items({
+            name: Joi.string().required(),
+            imageUrl: Joi.string().uri().required(),
+            description: Joi.string(),
+            link: Joi.string(),
+            tagline: Joi.string(),
+        }).optional(),
         secondaryCtaText: Joi.string(),
         secondaryCtaLink: Joi.string(),
         badge: Joi.string(),
         isActive: Joi.boolean(),
-        order: Joi.number().integer(),
+        status: Joi.string().valid('active', 'inactive').default('active'),
     }),
 };
 

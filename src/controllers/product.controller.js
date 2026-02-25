@@ -6,7 +6,7 @@ const { productService } = require('../services');
 
 const createProduct = catchAsync(async (req, res) => {
     const product = await productService.createProduct(req.body);
-    res.status(httpStatus.CREATED).send(product);
+    return res.status(httpStatus.CREATED).send(product);
 });
 
 const getProducts = catchAsync(async (req, res) => {

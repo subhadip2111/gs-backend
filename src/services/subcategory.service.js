@@ -30,6 +30,15 @@ const querySubCategories = async (filter, options) => {
   return subCategories;
 };
 
+const querySubCategoriesByCategoryId = async (filter, options) => {
+  const subCategories = await SubCategory.paginate(filter, {
+    ...options,
+    populate: "category",
+  });
+
+  return subCategories;
+};
+
 /**
  * Get subcategory by id
  * @param {ObjectId} id
@@ -81,4 +90,5 @@ module.exports = {
     getSubCategoryById,
     updateSubCategoryById,
     deleteSubCategoryById,
+    querySubCategoriesByCategoryId
 };

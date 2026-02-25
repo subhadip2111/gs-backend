@@ -42,10 +42,22 @@ const deleteSubCategory = {
     }),
 };
 
+const getSubCategoriesByCategoryId = {
+    params: Joi.object().keys({
+        categoryId: Joi.string().custom(objectId).required(),
+    }),
+    query: Joi.object().keys({
+        sortBy: Joi.string(),
+        limit: Joi.number().integer(),
+        page: Joi.number().integer(),
+    }),
+};
+
 module.exports = {
     createSubCategory,
     getSubCategories,
     getSubCategory,
     updateSubCategory,
     deleteSubCategory,
+    getSubCategoriesByCategoryId,
 };
