@@ -16,6 +16,7 @@ const createOrder = {
         shippingAddress: Joi.object().keys({
             fullName: Joi.string().required(),
             mobile: Joi.string().required(),
+            altMobile: Joi.string().allow(''),
             street: Joi.string().required(),
             village: Joi.string().allow(''),
             city: Joi.string().required(),

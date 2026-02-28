@@ -18,6 +18,7 @@ const userSchema = mongoose.Schema(
         }
       },
     },
+    altMobile: { type: String, default: '' },
     password: {
       type: String,
       trim: true,
@@ -38,6 +39,7 @@ const userSchema = mongoose.Schema(
       label: String,
       fullName: String,
       mobile: String,
+      altMobile: String,
       street: String,
       village: String,
       city: String,

@@ -5,12 +5,14 @@ const addressBody = Joi.object().keys({
     label: Joi.string(),
     fullName: Joi.string().required(),
     mobile: Joi.string().required(),
+    alternateMobile: Joi.string().allow(''),
     street: Joi.string().required(),
     village: Joi.string().allow(''),
     city: Joi.string().required(),
     pincode: Joi.string().required(),
     country: Joi.string().default('India'),
     isDefault: Joi.boolean(),
+    altMobile: Joi.string().allow(''),
 });
 
 const addAddress = {
@@ -25,12 +27,15 @@ const updateAddress = {
         label: Joi.string(),
         fullName: Joi.string(),
         mobile: Joi.string(),
+        alternateMobile: Joi.string().allow(''),
         street: Joi.string(),
         village: Joi.string().allow(''),
         city: Joi.string(),
         pincode: Joi.string(),
         country: Joi.string(),
         isDefault: Joi.boolean(),
+        altMobile: Joi.string().allow(''),
+
     }).min(1),
 };
 
