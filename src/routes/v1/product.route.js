@@ -14,6 +14,7 @@ router
 router.get('/trending', productController.getTrendingProducts);
 router.get('/new-arrivals', productController.getNewArrivals);
 router.get('/stats', auth('getUsers'), productController.getStats);
+router.get('/:productId/similar', validate(productValidation.getProduct), productController.getSimilarProducts);
 
 router
     .route('/:productId')

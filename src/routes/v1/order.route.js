@@ -6,18 +6,20 @@ const orderValidation = require('../../validations/order.validation');
 
 const router = express.Router();
 
+// User routes
 router
     .route('/')
     .post(auth(), validate(orderValidation.createOrder), orderController.createOrder)
-    .get(auth('getUsers'), validate(orderValidation.getOrders), orderController.getOrders); // Admin can see all orders
+    .get(auth('getUsers'), validate(orderValidation.getOrders), orderController.getOrders); // Admin: all orders
 
-router.get('/me', auth(), orderController.getMyOrders);
+router.get('/me', auth(), orderController.getMyOrders);                                      // User: my orders
+router.get('/stats', auth('getUsers'), orderController.getOrderStats);                       // Admin: stats
 
 router
     .route('/:orderId')
     .get(auth(), validate(orderValidation.getOrder), orderController.getOrder)
-    .patch(auth('manageUsers'), validate(orderValidation.updateOrderStatus), orderController.updateOrderStatus); // Admin only
+    .patch(auth('manageUsers'), validate(orderValidation.updateOrderStatus), orderController.updateOrderStatus); // Admin: update status
 
-router.patch('/:orderId/cancel', auth(), validate(orderValidation.cancelOrder), orderController.cancelOrder);
+router.patch('/:orderId/cancel', auth(), validate(orderValidation.cancelOrder), orderController.cancelOrder); // User: cancel
 
 module.exports = router;

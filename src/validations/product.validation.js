@@ -5,7 +5,7 @@ const createProduct = {
     body: Joi.object().keys({
         sku: Joi.string().required(),
         name: Joi.string().required(),
-        brand: Joi.string().required(),
+        brand: Joi.string().custom(objectId).required(),
         category: Joi.string().custom(objectId).required(),
         subcategory: Joi.string().custom(objectId).required(),
         price: Joi.number().required(),
@@ -17,6 +17,7 @@ const createProduct = {
                 color: Joi.object().keys({
                     name: Joi.string().required(),
                     hex: Joi.string().required(),
+                    images: Joi.array().items(Joi.string()),
                 }).required(),
                 sizes: Joi.array().items(
                     Joi.object().keys({
@@ -30,16 +31,24 @@ const createProduct = {
         specifications: Joi.array().items(Joi.string()),
         isTrending: Joi.boolean(),
         isNewArrival: Joi.boolean(),
+        isBestSeller: Joi.boolean(),
         materialAndCare: Joi.array().items(Joi.string()),
+        sizeAndFit: Joi.array().items(Joi.string()),
     }),
 };
 
 const getProducts = {
     query: Joi.object().keys({
-        category: Joi.string(),
-        subcategory: Joi.string(),
+        category: Joi.string().custom(objectId),
+        subcategory: Joi.string().custom(objectId),
+        brand: Joi.string().custom(objectId),
+        fabric: Joi.string(),
         isTrending: Joi.boolean(),
         isNewArrival: Joi.boolean(),
+        isBestSeller: Joi.boolean(),
+        minPrice: Joi.number(),
+        maxPrice: Joi.number(),
+        search: Joi.string(),
         sortBy: Joi.string(),
         limit: Joi.number().integer(),
         page: Joi.number().integer(),
@@ -60,7 +69,7 @@ const updateProduct = {
         .keys({
             sku: Joi.string(),
             name: Joi.string(),
-            brand: Joi.string(),
+            brand: Joi.string().custom(objectId),
             category: Joi.string().custom(objectId),
             subcategory: Joi.string().custom(objectId),
             price: Joi.number(),
@@ -72,6 +81,7 @@ const updateProduct = {
                     color: Joi.object().keys({
                         name: Joi.string().required(),
                         hex: Joi.string().required(),
+                        images: Joi.array().items(Joi.string()),
                     }).required(),
                     sizes: Joi.array().items(
                         Joi.object().keys({
@@ -85,7 +95,9 @@ const updateProduct = {
             specifications: Joi.array().items(Joi.string()),
             isTrending: Joi.boolean(),
             isNewArrival: Joi.boolean(),
+            isBestSeller: Joi.boolean(),
             materialAndCare: Joi.array().items(Joi.string()),
+            sizeAndFit: Joi.array().items(Joi.string()),
         })
         .min(1),
 };

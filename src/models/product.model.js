@@ -5,7 +5,7 @@ const productSchema = mongoose.Schema(
     {
         sku: { type: String, required: true, unique: true },
         name: { type: String, required: true },
-        brand: { type: String, required: true },
+        brand: { type: mongoose.Schema.Types.ObjectId, ref: 'Brand', required: true },
         category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true },
         subcategory: { type: mongoose.Schema.Types.ObjectId, ref: 'SubCategory', required: true },
         price: { type: Number, required: true },
@@ -16,6 +16,7 @@ const productSchema = mongoose.Schema(
             color: {
                 name: { type: String, required: true },
                 hex: { type: String, required: true },
+                images: [{ type: String }],
             },
             sizes: [{
                 size: { type: String, required: true },
@@ -28,7 +29,9 @@ const productSchema = mongoose.Schema(
         reviewsCount: { type: Number, default: 0 },
         isTrending: { type: Boolean, default: false },
         isNewArrival: { type: Boolean, default: false },
+        isBestSeller: { type: Boolean, default: false },
         materialAndCare: [{ type: String }],
+        sizeAndFit: [{ type: String }],
     },
     {
         timestamps: true,

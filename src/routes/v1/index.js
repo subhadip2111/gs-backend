@@ -8,6 +8,10 @@ const docsRoute = require('./docs.route');
 const categoryRoute = require('./category.route');
 const subCategoryRoute = require('./subcategory.route');
 const bannerRoute = require('./banner.route');
+const brandRoute = require('./brand.route');
+const cartRoute = require('./cart.route');
+const wishlistRoute = require('./wishlist.route');
+const addressRoute = require('./address.route');
 const uploadRoute = require('./upload.route');
 const config = require('../../config/config');
 
@@ -45,6 +49,22 @@ const defaultRoutes = [
   {
     path: '/banners',
     route: bannerRoute,
+  },
+  {
+    path: '/brands',
+    route: brandRoute,
+  },
+  {
+    path: '/cart',
+    route: cartRoute,
+  },
+  {
+    path: '/wishlist',
+    route: wishlistRoute,
+  },
+  {
+    path: '/address',
+    route: addressRoute,
   },
   {
     path: '/upload',

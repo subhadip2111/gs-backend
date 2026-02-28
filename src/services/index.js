@@ -8,3 +8,7 @@ module.exports.adminService = require('./admin.service');
 module.exports.categoryService = require('./category.service');
 module.exports.subCategoryService = require('./subcategory.service');
 module.exports.bannerService = require('./banner.service');
+module.exports.brandService = require('./brand.service');
+module.exports.cartService = require('./cart.service');
+module.exports.wishlistService = require('./wishlist.service');
+module.exports.addressService = require('./address.service');

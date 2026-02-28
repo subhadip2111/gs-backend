@@ -10,8 +10,21 @@ const createProduct = catchAsync(async (req, res) => {
 });
 
 const getProducts = catchAsync(async (req, res) => {
-    const filter = pick(req.query, ['category', 'subcategory', 'isTrending', 'isNewArrival']);
+    const filter = pick(req.query, ['category', 'subcategory', 'brand', 'fabric', 'isTrending', 'isNewArrival', 'isBestSeller']);
     const options = pick(req.query, ['sortBy', 'limit', 'page']);
+
+    // Price range filter
+    if (req.query.minPrice || req.query.maxPrice) {
+        filter.price = {};
+        if (req.query.minPrice) filter.price.$gte = Number(req.query.minPrice);
+        if (req.query.maxPrice) filter.price.$lte = Number(req.query.maxPrice);
+    }
+
+    // Search by name (case-insensitive)
+    if (req.query.search) {
+        filter.name = { $regex: req.query.search, $options: 'i' };
+    }
+
     const result = await productService.queryProducts(filter, options);
     res.send(result);
 });
@@ -56,6 +69,11 @@ const getStats = catchAsync(async (req, res) => {
     });
 });
 
+const getSimilarProducts = catchAsync(async (req, res) => {
+    const result = await productService.getSimilarProducts(req.params.productId);
+    res.send(result);
+});
+
 module.exports = {
     createProduct,
     getProducts,
@@ -65,4 +83,6 @@ module.exports = {
     getTrendingProducts,
     getNewArrivals,
     getStats,
+    getSimilarProducts,
 };
+

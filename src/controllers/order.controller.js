@@ -2,14 +2,29 @@ const httpStatus = require('http-status');
 const pick = require('../utils/pick');
 const ApiError = require('../utils/ApiError');
 const catchAsync = require('../utils/catchAsync');
-const { orderService } = require('../services');
+const { orderService, addressService } = require('../services');
 
 const createOrder = catchAsync(async (req, res) => {
+    const { addressId, shippingAddress, ...rest } = req.body;
+    let resolvedAddress = shippingAddress;
+
+    // If user passed a saved addressId, look it up from their profile
+    if (addressId) {
+        const addresses = await addressService.getAddresses(req.user.id);
+        const saved = addresses.id ? addresses.id(addressId) : addresses.find((a) => a._id.toString() === addressId);
+        if (!saved) throw new ApiError(httpStatus.NOT_FOUND, 'Saved address not found');
+        resolvedAddress = saved;
+    }
+
+    if (!resolvedAddress) throw new ApiError(httpStatus.BAD_REQUEST, 'shippingAddress or addressId is required');
+
     const orderBody = {
-        ...req.body,
+        ...rest,
+        shippingAddress: resolvedAddress,
         user: req.user.id,
         orderId: `ORD-${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
     };
+
     const order = await orderService.createOrder(orderBody);
     res.status(httpStatus.CREATED).send(order);
 });
@@ -30,9 +45,7 @@ const getMyOrders = catchAsync(async (req, res) => {
 
 const getOrder = catchAsync(async (req, res) => {
     const order = await orderService.getOrderById(req.params.orderId);
-    if (!order) {
-        throw new ApiError(httpStatus.NOT_FOUND, 'Order not found');
-    }
+    if (!order) throw new ApiError(httpStatus.NOT_FOUND, 'Order not found');
     // Check if user is owner or admin
     if (order.user.id !== req.user.id && req.user.role !== 'admin') {
         throw new ApiError(httpStatus.FORBIDDEN, 'Forbidden');
@@ -46,8 +59,13 @@ const updateOrderStatus = catchAsync(async (req, res) => {
 });
 
 const cancelOrder = catchAsync(async (req, res) => {
-    const order = await orderService.cancelOrder(req.params.orderId);
+    const order = await orderService.cancelOrder(req.params.orderId, req.user.id);
     res.send(order);
+});
+
+const getOrderStats = catchAsync(async (req, res) => {
+    const stats = await orderService.getOrderStats();
+    res.send(stats);
 });
 
 module.exports = {
@@ -57,4 +75,5 @@ module.exports = {
     getOrder,
     updateOrderStatus,
     cancelOrder,
+    getOrderStats,
 };

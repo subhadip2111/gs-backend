@@ -22,6 +22,7 @@ const createProduct = async (productBody) => {
  * @returns {Promise<QueryResult>}
  */
 const queryProducts = async (filter, options) => {
+    options.populate = 'category,subcategory,brand';
     const products = await Product.paginate(filter, options);
     return products;
 };
@@ -32,7 +33,7 @@ const queryProducts = async (filter, options) => {
  * @returns {Promise<Product>}
  */
 const getProductById = async (id) => {
-    return Product.findById(id);
+    return Product.findById(id).populate('category').populate('subcategory').populate('brand');
 };
 
 /**
@@ -65,10 +66,33 @@ const deleteProductById = async (productId) => {
     return product;
 };
 
+/**
+ * Get similar products
+ * @param {ObjectId} productId
+ * @returns {Promise<Product[]>}
+ */
+const getSimilarProducts = async (productId) => {
+    const product = await getProductById(productId);
+    if (!product) {
+        throw new ApiError(httpStatus.NOT_FOUND, 'Product not found');
+    }
+    return Product.find({
+        category: product.category,
+        subcategory: product.subcategory,
+        _id: { $ne: productId },
+    })
+        .limit(10)
+        .populate('category')
+        .populate('subcategory')
+        .populate('brand');
+};
+
 module.exports = {
     createProduct,
     queryProducts,
     getProductById,
     updateProductById,
     deleteProductById,
+    getSimilarProducts,
 };
+

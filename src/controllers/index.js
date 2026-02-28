@@ -6,3 +6,7 @@ module.exports.adminController = require('./admin.controller');
 module.exports.categoryController = require('./category.controller');
 module.exports.subCategoryController = require('./subcategory.controller');
 module.exports.bannerController = require('./banner.controller');
+module.exports.brandController = require('./brand.controller');
+module.exports.cartController = require('./cart.controller');
+module.exports.wishlistController = require('./wishlist.controller');
+module.exports.addressController = require('./address.controller');

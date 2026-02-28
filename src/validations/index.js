@@ -5,3 +5,7 @@ module.exports.orderValidation = require('./order.validation');
 module.exports.categoryValidation = require('./category.validation');
 module.exports.subCategoryValidation = require('./subcategory.validation');
 module.exports.bannerValidation = require('./banner.validation');
+module.exports.brandValidation = require('./brand.validation');
+module.exports.cartValidation = require('./cart.validation');
+module.exports.wishlistValidation = require('./wishlist.validation');
+module.exports.addressValidation = require('./address.validation');

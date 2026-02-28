@@ -32,7 +32,7 @@ const userSchema = mongoose.Schema(
     avatar: { type: String },
 
     fullName: { type: String, required: true },
-    mobile: { type: String,default:'' },
+    mobile: { type: String, default: '' },
     role: { type: String, enum: ['user', 'admin'], default: 'user' },
     addresses: [{
       label: String,
@@ -45,6 +45,14 @@ const userSchema = mongoose.Schema(
       country: { type: String, default: 'India' },
       isDefault: { type: Boolean, default: false }
     }],
+    cart: [
+      {
+        product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true },
+        quantity: { type: Number, required: true, default: 1 },
+        color: String,
+        size: String,
+      }
+    ],
     wishlist: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }]
   },
   {

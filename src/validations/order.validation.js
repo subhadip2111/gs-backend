@@ -9,21 +9,22 @@ const createOrder = {
                 quantity: Joi.number().required().min(1),
                 selectedSize: Joi.string(),
                 selectedColor: Joi.string(),
-                priceAtPurchase: Joi.number(),
             })
         ).required().min(1),
+        // Either addressId or shippingAddress must be provided — both optional here, enforced in controller
+        addressId: Joi.string().custom(objectId),
         shippingAddress: Joi.object().keys({
             fullName: Joi.string().required(),
             mobile: Joi.string().required(),
             street: Joi.string().required(),
-            village: Joi.string(),
+            village: Joi.string().allow(''),
             city: Joi.string().required(),
             pincode: Joi.string().required(),
             country: Joi.string(),
-        }).required(),
-        paymentMethod: Joi.string().valid('COD', 'Prepaid'),
+        }),
+        paymentMethod: Joi.string().valid('COD', 'Prepaid').default('COD'),
         appliedCoupon: Joi.string(),
-        discountAmount: Joi.number(),
+        discountAmount: Joi.number().default(0),
     }),
 };
 
@@ -49,6 +50,7 @@ const updateOrderStatus = {
     }),
     body: Joi.object().keys({
         status: Joi.string().required().valid('Processing', 'Packed', 'Shipped', 'Out for Delivery', 'Delivered', 'Cancelled'),
+        deliveryDate: Joi.string(),
     }),
 };
 
