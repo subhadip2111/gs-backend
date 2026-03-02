@@ -10,15 +10,48 @@ const ApiError = require('../utils/ApiError');
 const createOrder = async (orderBody) => {
     const { items } = orderBody;
 
-    // Auto-fetch product prices and calculate totalAmount
+    // Auto-fetch product prices, check stock, and calculate totalAmount
     let totalAmount = 0;
     const enrichedItems = await Promise.all(
         items.map(async (item) => {
+            console.log(item);
             const product = await Product.findById(item.product);
             if (!product) throw new ApiError(httpStatus.NOT_FOUND, `Product not found: ${item.product}`);
+
+            // Find matching variant and size to check stock
+            const variant = product.variants.find((v) => v.color.name === item.selectedColor);
+            if (!variant) throw new ApiError(httpStatus.BAD_REQUEST, `Color variant not found: ${item.selectedColor}`);
+
+            const sizeOption = variant.sizes.find((s) => s.size === item.selectedSize);
+            if (!sizeOption) throw new ApiError(httpStatus.BAD_REQUEST, `Size option not found: ${item.selectedSize}`);
+
+            if (sizeOption.quantity < item.quantity) {
+                throw new ApiError(httpStatus.BAD_REQUEST, `Insufficient stock for product ${product.name}, color ${item.selectedColor}, size ${item.selectedSize}. Available: ${sizeOption.quantity}`);
+            }
+
+            // Temporarily update totalAmount and enrich item
             const priceAtPurchase = product.price;
             totalAmount += priceAtPurchase * item.quantity;
             return { ...item, priceAtPurchase };
+        })
+    );
+
+    // After all validation, decrement the stock
+    await Promise.all(
+        items.map(async (item) => {
+            await Product.updateOne(
+                {
+                    _id: item.product,
+                    'variants.color.name': item.selectedColor,
+                    'variants.sizes.size': item.selectedSize,
+                },
+                {
+                    $inc: { 'variants.$[v].sizes.$[s].quantity': -item.quantity },
+                },
+                {
+                    arrayFilters: [{ 'v.color.name': item.selectedColor }, { 's.size': item.selectedSize }],
+                }
+            );
         })
     );
 

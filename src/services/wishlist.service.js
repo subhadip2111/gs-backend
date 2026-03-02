@@ -10,7 +10,7 @@ const ApiError = require('../utils/ApiError');
 const getWishlist = async (userId) => {
     const user = await User.findById(userId).populate({
         path: 'wishlist',
-        populate: ['category', 'subcategory', 'brand']
+        populate: ['category', 'subcategory', 'brand','product']
     });
     if (!user) {
         throw new ApiError(httpStatus.NOT_FOUND, 'User not found');

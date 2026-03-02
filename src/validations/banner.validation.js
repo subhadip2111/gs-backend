@@ -48,7 +48,7 @@ const updateBanner = {
     }),
     body: Joi.object()
         .keys({
-            type: Joi.string().valid('banner', 'popup', 'sidebar'),
+        type: Joi.string().valid('banner', 'popup', 'sidebar','brands').default('banner'),
             imageUrl: Joi.string().uri(),
             title: Joi.string(),
             subtitle: Joi.string(),
@@ -60,6 +60,8 @@ const updateBanner = {
             badge: Joi.string(),
             isActive: Joi.boolean(),
             order: Joi.number().integer(),
+            status: Joi.string().valid('active', 'inactive').default('active'),
+
         })
         .min(1),
 };
