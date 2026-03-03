@@ -44,7 +44,7 @@ const getUserById = async (id) => {
  */
 const getUserByEmail = async (email) => {
 
-  return await User.findOne({ email });
+  return await User.findOne({ email }).populate('wishlist').populate('cart').populate('orders').populate('addresses').populate('reviews');
 };
 
 /**
