@@ -1,6 +1,16 @@
 const httpStatus = require('http-status');
-const { Product } = require('../models');
+const { Product, Category } = require('../models');
 const ApiError = require('../utils/ApiError');
+
+/**
+ * Get category IDs matching a search term
+ * @param {string} searchTerm
+ * @returns {Promise<ObjectId[]>}
+ */
+const getCategoryIdsByName = async (searchTerm) => {
+    const categories = await Category.find({ name: { $regex: searchTerm, $options: 'i' } }).select('_id');
+    return categories.map((cat) => cat._id);
+};
 
 /**
  * Create a product
@@ -94,5 +104,6 @@ module.exports = {
     updateProductById,
     deleteProductById,
     getSimilarProducts,
+    getCategoryIdsByName,
 };
 

@@ -10,7 +10,6 @@ router
     .route('/')
     .post(auth('manageBanners'), validate(bannerValidation.createBanner), bannerController.createBanner)
     .get(validate(bannerValidation.getBanners), bannerController.getBanners);
-
 router
     .route('/:bannerId')
     .get(validate(bannerValidation.getBanner), bannerController.getBanner)

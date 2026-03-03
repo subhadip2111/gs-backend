@@ -20,9 +20,21 @@ const getProducts = catchAsync(async (req, res) => {
         if (req.query.maxPrice) filter.price.$lte = Number(req.query.maxPrice);
     }
 
-    // Search by name (case-insensitive)
+    // Search by name, SKU, or category name (case-insensitive)
     if (req.query.search) {
-        filter.name = { $regex: req.query.search, $options: 'i' };
+        const searchRegex = { $regex: req.query.search, $options: 'i' };
+        const matchingCategoryIds = await productService.getCategoryIdsByName(req.query.search);
+
+        const orConditions = [
+            { name: searchRegex },
+            { sku: searchRegex },
+        ];
+
+        if (matchingCategoryIds.length > 0) {
+            orConditions.push({ category: { $in: matchingCategoryIds } });
+        }
+
+        filter.$or = orConditions;
     }
 
     const result = await productService.queryProducts(filter, options);
