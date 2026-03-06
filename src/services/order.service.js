@@ -29,8 +29,11 @@ const createOrder = async (orderBody) => {
                 throw new ApiError(httpStatus.BAD_REQUEST, `Insufficient stock for product ${product.name}, color ${item.selectedColor}, size ${item.selectedSize}. Available: ${sizeOption.quantity}`);
             }
 
+
+            // now in db product schema was change . in product size had the price value  and it comes in aray 
+
             // Temporarily update totalAmount and enrich item
-            const priceAtPurchase = product.price;
+            const priceAtPurchase = variant.sizes[0].price;
             totalAmount += priceAtPurchase * item.quantity;
             return { ...item, priceAtPurchase };
         })
@@ -113,6 +116,26 @@ const cancelOrder = async (orderId, userId) => {
         isCompleted: true,
     });
     await order.save();
+
+    // Restore stock for each cancelled item
+    await Promise.all(
+        order.items.map(async (item) => {
+            await Product.updateOne(
+                {
+                    _id: item.product,
+                    'variants.color.name': item.selectedColor,
+                    'variants.sizes.size': item.selectedSize,
+                },
+                {
+                    $inc: { 'variants.$[v].sizes.$[s].quantity': item.quantity },
+                },
+                {
+                    arrayFilters: [{ 'v.color.name': item.selectedColor }, { 's.size': item.selectedSize }],
+                }
+            );
+        })
+    );
+
     return order;
 };
 

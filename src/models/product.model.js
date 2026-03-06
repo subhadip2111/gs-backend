@@ -8,8 +8,7 @@ const productSchema = mongoose.Schema(
         brand: { type: mongoose.Schema.Types.ObjectId, ref: 'Brand', required: true },
         category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true },
         subcategory: { type: mongoose.Schema.Types.ObjectId, ref: 'SubCategory', required: true },
-        price: { type: Number, required: true },
-        originalPrice: { type: Number },
+      
         description: { type: String, required: true },
         images: [{ type: String }],
         variants: [{
@@ -21,6 +20,8 @@ const productSchema = mongoose.Schema(
             sizes: [{
                 size: { type: String, required: true },
                 quantity: { type: Number, required: true, default: 0 },
+                price: { type: Number, required: true },
+                originalPrice: { type: Number },
             }],
         }],
         fabric: { type: String },

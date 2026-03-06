@@ -8,8 +8,7 @@ const createProduct = {
         brand: Joi.string().custom(objectId).required(),
         category: Joi.string().custom(objectId).required(),
         subcategory: Joi.string().custom(objectId).required(),
-        price: Joi.number().required(),
-        originalPrice: Joi.number(),
+
         description: Joi.string().required(),
         images: Joi.array().items(Joi.string()),
         variants: Joi.array().items(
@@ -23,6 +22,8 @@ const createProduct = {
                     Joi.object().keys({
                         size: Joi.string().required(),
                         quantity: Joi.number().integer().min(0).required(),
+                        price: Joi.number().required(),
+                        originalPrice: Joi.number(),
                     })
                 ),
             })
@@ -87,6 +88,8 @@ const updateProduct = {
                         Joi.object().keys({
                             size: Joi.string().required(),
                             quantity: Joi.number().integer().min(0).required(),
+                                price: Joi.number().required(),
+                        originalPrice: Joi.number(),
                         })
                     ),
                 })
