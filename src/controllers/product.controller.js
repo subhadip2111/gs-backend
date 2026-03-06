@@ -2,7 +2,7 @@ const httpStatus = require('http-status');
 const pick = require('../utils/pick');
 const ApiError = require('../utils/ApiError');
 const catchAsync = require('../utils/catchAsync');
-const { productService } = require('../services');
+const { productService, reviewService } = require('../services');
 
 const createProduct = catchAsync(async (req, res) => {
     const product = await productService.createProduct(req.body);
@@ -46,7 +46,17 @@ const getProduct = catchAsync(async (req, res) => {
     if (!product) {
         throw new ApiError(httpStatus.NOT_FOUND, 'Product not found');
     }
-    res.send(product);
+
+    // Fetch the latest 5 reviews for the product
+    const reviews = await reviewService.queryReviews(
+        { product: req.params.productId },
+        { limit: 5, sortBy: 'createdAt:desc' }
+    );
+
+    const productJson = product.toJSON();
+    productJson.reviews = reviews.results;
+
+    res.send(productJson);
 });
 
 const updateProduct = catchAsync(async (req, res) => {

@@ -30,9 +30,28 @@ const getAllCustomers = catchAsync(async (req, res) => {
     res.send(result);
 });
 
+const getMonthlySales = catchAsync(async (req, res) => {
+    const year = parseInt(req.query.year, 10) || new Date().getFullYear();
+    const result = await adminService.getMonthlySales(year);
+    res.send(result);
+});
+
+const getTopCategories = catchAsync(async (req, res) => {
+    const result = await adminService.getTopCategories();
+    res.send(result);
+});
+
+const getSalesPerformance = catchAsync(async (req, res) => {
+    const result = await adminService.getSalesPerformance();
+    res.send(result);
+});
+
 module.exports = {
     getStats,
     getAllProducts,
     getAllOrders,
     getAllCustomers,
+    getMonthlySales,
+    getTopCategories,
+    getSalesPerformance,
 };

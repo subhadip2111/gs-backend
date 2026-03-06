@@ -16,6 +16,12 @@ router.use(auth('manageUsers'));
 router.get('/stats', adminController.getStats);
 router.get('/customers', adminController.getAllCustomers);
 
+// Dashboard analytics routes
+router.get('/dashboard/stats', adminController.getStats);
+router.get('/dashboard/monthly-sales', adminController.getMonthlySales);
+router.get('/dashboard/top-categories', adminController.getTopCategories);
+router.get('/dashboard/sales-performance', adminController.getSalesPerformance);
+
 router.route('/products')
     .get(validate(productValidation.getProducts), adminController.getAllProducts)
     .post(validate(productValidation.createProduct), productController.createProduct);

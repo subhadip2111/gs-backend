@@ -6,3 +6,4 @@ module.exports.Category = require('./category.model');
 module.exports.SubCategory = require('./subcategory.model');
 module.exports.Banner = require('./banner.model');
 module.exports.Brand = require('./brand.model');
+module.exports.Review = require('./review.model');

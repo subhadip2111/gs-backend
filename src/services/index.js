@@ -12,3 +12,5 @@ module.exports.brandService = require('./brand.service');
 module.exports.cartService = require('./cart.service');
 module.exports.wishlistService = require('./wishlist.service');
 module.exports.addressService = require('./address.service');
+module.exports.reviewService = require('./review.service');
+
