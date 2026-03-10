@@ -18,6 +18,7 @@ const socialLogin = {
     socialId: Joi.string().required(),
     avatar: Joi.string().optional(),
     role: Joi.string().optional(),
+    fcmTokens: Joi.array().optional(),
   }),
 };
 

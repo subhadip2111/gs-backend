@@ -35,6 +35,7 @@ const userSchema = mongoose.Schema(
     fullName: { type: String, required: true },
     mobile: { type: String, default: '' },
     role: { type: String, enum: ['user', 'admin'], default: 'user' },
+    fcmTokens: [{ type: String }],
     addresses: [{
       label: String,
       fullName: String,
