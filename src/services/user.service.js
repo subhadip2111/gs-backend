@@ -75,7 +75,7 @@ const updateUserByEmail = async (email, updateBody) => {
   if (updateBody.email && (await User.isEmailTaken(updateBody.email, user._id))) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
   }
-  console.log('hfdhdf',updateBody);
+  console.log('hfdhdf', updateBody);
   Object.assign(user, updateBody);
   await user.save();
   return user;
@@ -103,7 +103,8 @@ const deleteUserById = async (userId) => {
 const upsertUserByEmail = async (userBody) => {
   let user = await getUserByEmail(userBody.email);
   if (user) {
-    return user;
+    const updateUser = await User.findOneAndUpdate({ email: userBody.email }, userBody, { new: true })
+    return updateUser;
   } else {
     user = await User.create(userBody);
   }
