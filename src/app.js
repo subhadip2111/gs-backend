@@ -13,6 +13,7 @@ const { authLimiter } = require('./middlewares/rateLimiter');
 const routes = require('./routes/v1');
 const { errorConverter, errorHandler } = require('./middlewares/error');
 const ApiError = require('./utils/ApiError');
+const apiRequestTime = require('./middlewares/apiRequest');
 
 const app = express();
 
@@ -52,6 +53,7 @@ if (config.env === 'production') {
 
 // v1 api routes
 app.use('/v1', routes);
+app.use(apiRequestTime)
 app.get('/', (req, res) => {
   res.send('Hello World!');
 });
