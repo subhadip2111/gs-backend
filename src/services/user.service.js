@@ -103,10 +103,17 @@ const deleteUserById = async (userId) => {
 const upsertUserByEmail = async (userBody) => {
   let user = await getUserByEmail(userBody.email);
   if (user) {
-    const updateUser = await User.findOneAndUpdate({ email: userBody.email }, userBody, { new: true })
+    const updateUser = await User.findOneAndUpdate({ email: userBody.email,newUser:false}, userBody, { new: true })
     return updateUser;
   } else {
+
     user = await User.create(userBody);
+
+    // trigger a webpush notification to the user 
+
+    // like thank you for joining us and here is a promocodes for used on first order
+    
+    
   }
   return user;
 };

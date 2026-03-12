@@ -132,9 +132,11 @@ const getPromocodesBasedOnUserType = async (userId) => {
         isActive: true,
         startDate: { $lte: now },
         endDate: { $gte: now },
+        users: userId, // User must be in the allowed list
         $or: [
             { userType: { $in: userTypes } },
-            { users: userId }
+            { userType: { $exists: false } },
+            { userType: null }
         ]
     });
 

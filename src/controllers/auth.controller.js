@@ -66,9 +66,7 @@ const verifyEmail = catchAsync(async (req, res) => {
 
 const socialLogin = catchAsync(async (req, res) => {
   const { email, fullName, mobile,fcmTokens} = req.body;
-  console.log(fcmTokens);
   const user = await userService.upsertUserByEmail({ email, fullName, mobile,fcmTokens });
-  console.log(user);
   const tokens = await tokenService.generateAuthTokens(user);
   res.send({ user, accessToken: tokens.access.token, refreshToken: tokens.refresh.token });
 });

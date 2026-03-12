@@ -31,8 +31,8 @@ const orderSchema = mongoose.Schema(
             default: 'Processing',
         },
         paymentMethod: { type: String, default: 'COD' },
-        appliedCoupon: String,
-        discountAmount: { type: Number, default: 0 },
+        couponCode: String,
+        discount: { type: Number, default: 0 },
         deliveryDate: String,
         trackingSteps: [
             {

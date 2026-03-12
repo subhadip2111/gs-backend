@@ -24,8 +24,8 @@ const createOrder = {
             country: Joi.string(),
         }),
         paymentMethod: Joi.string().valid('COD', 'Prepaid').default('COD'),
-        appliedCoupon: Joi.string(),
-        discountAmount: Joi.number().default(0),
+        couponCode: Joi.string(),
+        discount: Joi.number().default(0),
     }),
 };
 

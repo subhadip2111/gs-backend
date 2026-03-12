@@ -1,5 +1,5 @@
 const httpStatus = require('http-status');
-const { Order, Product, PromoCode } = require('../models');
+const { Order, Product, PromoCode, User } = require('../models');
 const ApiError = require('../utils/ApiError');
 
 /**
@@ -8,7 +8,7 @@ const ApiError = require('../utils/ApiError');
  * @returns {Promise<Order>}
  */
 const createOrder = async (orderBody) => {
-    const { items, appliedCoupon, user } = orderBody;
+    const { items, couponCode, user } = orderBody;
 
     // Auto-fetch product prices, check stock, and calculate totalAmount
     let totalAmount = 0;
@@ -35,11 +35,11 @@ const createOrder = async (orderBody) => {
         })
     );
     
-    let discountAmount = 0;
+    let discount = 0;
 
     // Validate and apply promocode
-    if (appliedCoupon) {
-        const promo = await PromoCode.findOne({ code: appliedCoupon, isActive: true });
+    if (couponCode) {
+        const promo = await PromoCode.findOne({ code: couponCode, isActive: true });
         if (!promo) {
             throw new ApiError(httpStatus.BAD_REQUEST, 'Invalid or inactive promo code');
         }
@@ -53,32 +53,31 @@ const createOrder = async (orderBody) => {
             throw new ApiError(httpStatus.BAD_REQUEST, 'Promo code usage limit reached');
         }
 
-        if (totalAmount < promo.minOrderAmount) {
-            throw new ApiError(httpStatus.BAD_REQUEST, `Order amount must be at least ${promo.minOrderAmount} to apply this promo code`);
-        }
-
-        if (promo.users.some((userId) => userId.toString() === user.toString())) {
-            throw new ApiError(httpStatus.BAD_REQUEST, 'You have already used this promo code');
+        // Check if user is in the allowed list (users array)
+        const isUserAllowed = promo.users.some((userId) => userId.toString() === user.toString());
+        
+        if (!isUserAllowed) {
+            throw new ApiError(httpStatus.BAD_REQUEST, 'You are not eligible for this promo code or have already used it');
         }
 
         if (promo.discountType === 'percentage') {
-            discountAmount = (totalAmount * promo.discountValue) / 100;
+            discount = (totalAmount * promo.discountValue) / 100;
         } else if (promo.discountType === 'fixed') {
-            discountAmount = promo.discountValue;
+            discount = promo.discountValue;
         }
 
-        if (discountAmount > promo.maxDiscountAmount) {
-            discountAmount = promo.maxDiscountAmount;
+        if (discount > promo.maxDiscountAmount) {
+            discount = promo.maxDiscountAmount;
         }
 
-        totalAmount -= discountAmount;
+        totalAmount -= discount;
         
-        // Update promo code usage atomically
+        // Update promo code usage: increment usedCount and REMOVE user from allowed list
         await PromoCode.updateOne(
             { _id: promo._id },
             { 
                 $inc: { usedCount: 1 },
-                $push: { users: user }
+                $pull: { users: user }
             }
         );
     }
@@ -105,7 +104,7 @@ const createOrder = async (orderBody) => {
     // Update user status
     await User.updateOne({ _id: user }, { newUser: false });
 
-    return Order.create({ ...orderBody, items: enrichedItems, totalAmount, discountAmount });
+    return Order.create({ ...orderBody, items: enrichedItems, totalAmount, discount });
 };
 
 /**
