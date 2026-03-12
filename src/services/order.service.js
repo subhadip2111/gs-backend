@@ -1,20 +1,19 @@
 const httpStatus = require('http-status');
-const { Order, Product } = require('../models');
+const { Order, Product, PromoCode } = require('../models');
 const ApiError = require('../utils/ApiError');
 
 /**
- * Create an order — auto-calculates totalAmount from product prices
+ * Create an order — auto-calculates totalAmount from product prices and applies promocodes
  * @param {Object} orderBody
  * @returns {Promise<Order>}
  */
 const createOrder = async (orderBody) => {
-    const { items } = orderBody;
+    const { items, appliedCoupon, user } = orderBody;
 
     // Auto-fetch product prices, check stock, and calculate totalAmount
     let totalAmount = 0;
     const enrichedItems = await Promise.all(
         items.map(async (item) => {
-            console.log(item);
             const product = await Product.findById(item.product);
             if (!product) throw new ApiError(httpStatus.NOT_FOUND, `Product not found: ${item.product}`);
 
@@ -29,15 +28,60 @@ const createOrder = async (orderBody) => {
                 throw new ApiError(httpStatus.BAD_REQUEST, `Insufficient stock for product ${product.name}, color ${item.selectedColor}, size ${item.selectedSize}. Available: ${sizeOption.quantity}`);
             }
 
-
-            // now in db product schema was change . in product size had the price value  and it comes in aray 
-
             // Temporarily update totalAmount and enrich item
             const priceAtPurchase = variant.sizes[0].price;
             totalAmount += priceAtPurchase * item.quantity;
             return { ...item, priceAtPurchase };
         })
     );
+    
+    let discountAmount = 0;
+
+    // Validate and apply promocode
+    if (appliedCoupon) {
+        const promo = await PromoCode.findOne({ code: appliedCoupon, isActive: true });
+        if (!promo) {
+            throw new ApiError(httpStatus.BAD_REQUEST, 'Invalid or inactive promo code');
+        }
+        
+        const now = new Date();
+        if (now < promo.startDate || now > promo.endDate) {
+            throw new ApiError(httpStatus.BAD_REQUEST, 'Promo code is expired or not yet active');
+        }
+
+        if (promo.usedCount >= promo.usageLimit) {
+            throw new ApiError(httpStatus.BAD_REQUEST, 'Promo code usage limit reached');
+        }
+
+        if (totalAmount < promo.minOrderAmount) {
+            throw new ApiError(httpStatus.BAD_REQUEST, `Order amount must be at least ${promo.minOrderAmount} to apply this promo code`);
+        }
+
+        if (promo.users.some((userId) => userId.toString() === user.toString())) {
+            throw new ApiError(httpStatus.BAD_REQUEST, 'You have already used this promo code');
+        }
+
+        if (promo.discountType === 'percentage') {
+            discountAmount = (totalAmount * promo.discountValue) / 100;
+        } else if (promo.discountType === 'fixed') {
+            discountAmount = promo.discountValue;
+        }
+
+        if (discountAmount > promo.maxDiscountAmount) {
+            discountAmount = promo.maxDiscountAmount;
+        }
+
+        totalAmount -= discountAmount;
+        
+        // Update promo code usage atomically
+        await PromoCode.updateOne(
+            { _id: promo._id },
+            { 
+                $inc: { usedCount: 1 },
+                $push: { users: user }
+            }
+        );
+    }
 
     // After all validation, decrement the stock
     await Promise.all(
@@ -58,7 +102,10 @@ const createOrder = async (orderBody) => {
         })
     );
 
-    return Order.create({ ...orderBody, items: enrichedItems, totalAmount });
+    // Update user status
+    await User.updateOne({ _id: user }, { newUser: false });
+
+    return Order.create({ ...orderBody, items: enrichedItems, totalAmount, discountAmount });
 };
 
 /**

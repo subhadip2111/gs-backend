@@ -9,3 +9,5 @@ module.exports.brandValidation = require('./brand.validation');
 module.exports.cartValidation = require('./cart.validation');
 module.exports.wishlistValidation = require('./wishlist.validation');
 module.exports.addressValidation = require('./address.validation');
+module.exports.promoCodeValidation = require('./promocode.validation');
+module.exports.adminValidation = require('./admin.validation');

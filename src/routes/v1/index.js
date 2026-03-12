@@ -13,6 +13,7 @@ const cartRoute = require('./cart.route');
 const wishlistRoute = require('./wishlist.route');
 const addressRoute = require('./address.route');
 const uploadRoute = require('./upload.route');
+const promoCodeRoute = require('./promocode.route');
 const config = require('../../config/config');
 
 const router = express.Router();
@@ -69,6 +70,10 @@ const defaultRoutes = [
   {
     path: '/upload',
     route: uploadRoute,
+  },
+  {
+    path: '/promocodes',
+    route: promoCodeRoute,
   },
 ];
 

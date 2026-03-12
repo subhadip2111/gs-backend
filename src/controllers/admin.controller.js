@@ -46,6 +46,18 @@ const getSalesPerformance = catchAsync(async (req, res) => {
     res.send(result);
 });
 
+const getUsersByCategory = catchAsync(async (req, res) => {
+    const query = pick(req.query, ['type', 'startDate', 'endDate','keyword']);
+    const options = pick(req.query, ['sortBy', 'limit', 'page']);
+    const result = await adminService.getUsersByCategory(query, options);
+    res.send(result);
+});
+
+const getUserStats = catchAsync(async (req, res) => {
+    const result = await adminService.getUserStats();
+    res.send(result);
+});
+
 module.exports = {
     getStats,
     getAllProducts,
@@ -54,4 +66,6 @@ module.exports = {
     getMonthlySales,
     getTopCategories,
     getSalesPerformance,
+    getUsersByCategory,
+    getUserStats,
 };

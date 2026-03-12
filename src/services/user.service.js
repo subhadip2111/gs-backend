@@ -1,5 +1,5 @@
 const httpStatus = require('http-status');
-const { User } = require('../models');
+const { User, Order } = require('../models');
 const ApiError = require('../utils/ApiError');
 
 /**
@@ -111,6 +111,106 @@ const upsertUserByEmail = async (userBody) => {
   return user;
 };
 
+/**
+ * Get user IDs based on their type/activity
+ * @param {string} type - 'newUser', 'regular user', 'frequent_user', 'prime_user', 'inactive user'
+ * @returns {Promise<Array<ObjectId>>}
+ */
+const getUserIdsByType = async (type) => {
+  let userIds = [];
+  const now = new Date();
+
+  switch (type) {
+    case 'newUser':
+      userIds = await User.find({ role: 'user', newUser: true }).distinct('_id');
+      break;
+
+    case 'regular_user': {
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(now.getDate() - 30);
+      const activeUsers = await Order.aggregate([
+        {
+          $match: {
+            status: 'Delivered',
+            createdAt: { $gte: thirtyDaysAgo }
+          }
+        },
+        {
+          $group: { _id: '$user' }
+        }
+      ]);
+      userIds = activeUsers.map(u => u._id);
+      break;
+    }
+
+    case 'frequent_user': {
+      const sixMonthsAgo = new Date();
+      sixMonthsAgo.setMonth(now.getMonth() - 6);
+      const frequentUsers = await Order.aggregate([
+        {
+          $match: {
+            status: 'Delivered',
+            createdAt: { $gte: sixMonthsAgo }
+          }
+        },
+        {
+          $group: {
+            _id: '$user',
+            orderCount: { $sum: 1 }
+          }
+        },
+        {
+          $match: { orderCount: { $gte: 3 } }
+        }
+      ]);
+      userIds = frequentUsers.map(u => u._id)
+      break;
+    }
+    case 'all':
+      userIds = await User.find({ role: 'user' }).distinct('_id');
+      break;
+    
+
+    case 'prime_user': {
+      const sixMonthsAgo = new Date();
+      sixMonthsAgo.setMonth(now.getMonth() - 6);
+      const primeUsers = await Order.aggregate([
+        {
+          $match: {
+            status: 'Delivered',
+            createdAt: { $gte: sixMonthsAgo }
+          }
+        },
+        {
+          $group: {
+            _id: '$user',
+            totalSpent: { $sum: '$totalAmount' }
+          }
+        },
+        {
+          $match: { totalSpent: { $gte: 10000 } }
+        }
+      ]);
+      userIds = primeUsers.map(u => u._id);
+      break;
+    }
+
+    case 'inactive_user': {
+      const usersWithOrders = await Order.distinct('user');
+      userIds = await User.find({
+        role: 'user',
+        _id: { $nin: usersWithOrders }
+      }).distinct('_id');
+      break;
+    }
+
+    default:
+      userIds = [];
+  }
+
+  return userIds;
+};
+
 module.exports = {
   createUser,
   queryUsers,
@@ -120,4 +220,5 @@ module.exports = {
   deleteUserById,
   upsertUserByEmail,
   updateUserByEmail,
+  getUserIdsByType,
 };

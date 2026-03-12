@@ -180,9 +180,141 @@ const getSalesPerformance = async () => {
     return { period: 'last_30_days', dailySales };
 };
 
+/**
+ * Get users by category (new, premium, old)
+ * @param {Object} query - Query parameters (type, startDate, endDate)
+ * @param {Object} options - Pagination options
+ * @returns {Promise<Object>}
+ */
+const getUsersByCategory = async (query, options) => {
+    const { type, startDate, endDate, keyword } = query;
+    let filter = { role: 'user' };
+
+    if (type === 'new') {
+        filter.newUser = true;
+    } else if (type === 'premium') {
+        const sixMonthsAgo = new Date();
+        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+        // Find users who spent >= 10,000 in last 6 months
+        const premiumUserIds = await Order.aggregate([
+            {
+                $match: {
+                    status: 'Delivered',
+                    createdAt: { $gte: sixMonthsAgo },
+                },
+            },
+            {
+                $group: {
+                    _id: '$user',
+                    totalSpent: { $sum: '$totalAmount' },
+                },
+            },
+            { $match: { totalSpent: { $gte: 10000 } } },
+            { $project: { _id: 1 } },
+        ]);
+
+        filter._id = { $in: premiumUserIds.map((u) => u._id) };
+    } else if (type === 'old') {
+        filter.newUser = false;
+        if (startDate || endDate) {
+            filter.createdAt = {};
+            if (startDate) filter.createdAt.$gte = new Date(startDate);
+            if (endDate) filter.createdAt.$lte = new Date(endDate);
+        }
+    } else if (type === 'all') {
+        if (startDate || endDate) {
+            filter.createdAt = {};
+            if (startDate) filter.createdAt.$gte = new Date(startDate);
+            if (endDate) filter.createdAt.$lte = new Date(endDate);
+        }
+    }
+
+    if (keyword) {
+        filter.$or = [
+            { fullName: { $regex: keyword, $options: 'i' } },
+            { email: { $regex: keyword, $options: 'i' } }
+        ];
+    }
+
+    const result = await User.paginate(filter, options);
+
+    // Calculate total spent for the paginated users
+    const userIds = result.results.map((user) => user._id);
+    const spendingAgg = await Order.aggregate([
+        {
+            $match: {
+                user: { $in: userIds },
+                status: { $eq: 'Delivered' }
+            }
+        },
+        {
+            $group: {
+                _id: '$user',
+                totalSpent: { $sum: '$totalAmount' }
+            }
+        }
+    ]);
+
+    // Map the spending back to the user objects
+    const spendMap = {};
+    spendingAgg.forEach((agg) => {
+        spendMap[agg._id.toString()] = agg.totalSpent;
+    });
+
+    result.results = result.results.map((user) => {
+        const userObj = user.toJSON();
+        userObj.totalSpent = spendMap[user._id.toString()] || 0;
+        return userObj;
+    });
+
+    return result;
+};
+
+/**
+ * Get user stats for dashboard (total, new, old, premium)
+ * @returns {Promise<Object>}
+ */
+const getUserStats = async () => {
+    const totalUserCount = await User.countDocuments({ role: 'user' });
+    const newUserCount = await User.countDocuments({ role: 'user', newUser: true });
+    const oldUserCount = await User.countDocuments({ role: 'user', newUser: false });
+
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+    const premiumUserIds = await Order.aggregate([
+        {
+            $match: {
+                status: 'Delivered',
+                createdAt: { $gte: sixMonthsAgo },
+            },
+        },
+        {
+            $group: {
+                _id: '$user',
+                totalSpent: { $sum: '$totalAmount' },
+            },
+        },
+        { $match: { totalSpent: { $gte: 10000 } } },
+        { $count: 'count' },
+    ]);
+
+    const primeUserCount = premiumUserIds.length > 0 ? premiumUserIds[0].count : 0;
+
+    return {
+        totalUserCount,
+        newUserCount,
+        oldUserCount,
+        primeUserCount,
+    };
+};
+
 module.exports = {
     getAdminStats,
     getMonthlySales,
     getTopCategories,
     getSalesPerformance,
+    getUsersByCategory,
+    getUserStats,
 };

@@ -48,6 +48,8 @@ const userSchema = mongoose.Schema(
       country: { type: String, default: 'India' },
       isDefault: { type: Boolean, default: false }
     }],
+
+     newUser: { type: Boolean, default: true },
     cart: [
       {
         product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true },
@@ -56,7 +58,7 @@ const userSchema = mongoose.Schema(
         size: String,
       }
     ],
-    wishlist: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }]
+    wishlist: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }],
   },
   {
     timestamps: true,

@@ -5,8 +5,7 @@ const productController = require('../../controllers/product.controller');
 const orderController = require('../../controllers/order.controller');
 
 const validate = require('../../middlewares/validate');
-const productValidation = require('../../validations/product.validation');
-const orderValidation = require('../../validations/order.validation');
+const { adminValidation, productValidation, orderValidation } = require('../../validations');
 
 const router = express.Router();
 
@@ -15,6 +14,8 @@ router.use(auth('manageUsers'));
 
 router.get('/stats', adminController.getStats);
 router.get('/customers', adminController.getAllCustomers);
+router.get('/customers/categorized', validate(adminValidation.getUsersByCategory), adminController.getUsersByCategory);
+router.get('/dashboard/user-stats', adminController.getUserStats);
 
 // Dashboard analytics routes
 router.get('/dashboard/stats', adminController.getStats);

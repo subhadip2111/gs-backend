@@ -10,3 +10,4 @@ module.exports.brandController = require('./brand.controller');
 module.exports.cartController = require('./cart.controller');
 module.exports.wishlistController = require('./wishlist.controller');
 module.exports.addressController = require('./address.controller');
+module.exports.promoCodeController = require('./promocode.controller');
