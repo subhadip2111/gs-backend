@@ -310,6 +310,22 @@ const getUserStats = async () => {
     };
 };
 
+
+
+const getAuserOrderHistory=async(userId,page,limit)=>{
+
+    const options={
+        page,
+        limit,
+        sort:{createdAt:'desc'}
+    }
+    // return created at value of the orders
+
+    const result=await Order.find({user:userId}).sort({createdAt:'desc'}).skip((page-1)*limit).limit(limit)
+    return result
+}
+
+
 module.exports = {
     getAdminStats,
     getMonthlySales,
@@ -317,4 +333,5 @@ module.exports = {
     getSalesPerformance,
     getUsersByCategory,
     getUserStats,
+    getAuserOrderHistory
 };

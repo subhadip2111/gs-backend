@@ -58,6 +58,12 @@ const getUserStats = catchAsync(async (req, res) => {
     res.send(result);
 });
 
+const getAuserOrderHistory = catchAsync(async (req, res) => {
+    const userId = req.params.userId;
+    const result = await adminService.getAuserOrderHistory(userId);
+    res.send(result);
+});
+
 module.exports = {
     getStats,
     getAllProducts,
@@ -68,4 +74,5 @@ module.exports = {
     getSalesPerformance,
     getUsersByCategory,
     getUserStats,
+    getAuserOrderHistory
 };

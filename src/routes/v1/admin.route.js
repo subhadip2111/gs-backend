@@ -21,8 +21,8 @@ router.get('/dashboard/user-stats', adminController.getUserStats);
 router.get('/dashboard/stats', adminController.getStats);
 router.get('/dashboard/monthly-sales', adminController.getMonthlySales);
 router.get('/dashboard/top-categories', adminController.getTopCategories);
-router.get('/dashboard/sales-performance', adminController.getSalesPerformance);
-
+router.get('/dashboard/sales-performance', adminController.getSalesPerformance)
+router.get('/dashboard/user-order-history/:userId', adminController.getAuserOrderHistory)
 router.route('/products')
     .get(validate(productValidation.getProducts), adminController.getAllProducts)
     .post(validate(productValidation.createProduct), productController.createProduct);
