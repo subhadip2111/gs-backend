@@ -8,7 +8,25 @@ const createPromoCode = async (promoCodeBody) => {
         const userIds = await userService.getUserIdsByType(promoCodeBody.userType);
         promoCodeBody.users = userIds;
     }
-    return PromoCode.create(promoCodeBody);
+    const promoCode = await PromoCode.create(promoCodeBody);
+
+    // Trigger broadcast notification
+    const { broadcastNotification } = require('./pushNotification.service');
+    const discountText = promoCode.discountType === 'percentage' 
+        ? `${promoCode.discountValue}% OFF` 
+        : `₹${promoCode.discountValue} OFF`;
+    
+    broadcastNotification('newPromocode', {
+        code: promoCode.code,
+        discount: discountText,
+        endDate: promoCode.endDate.toLocaleDateString(),
+        imageUrl: 'https://img.freepik.com/premium-vector/special-offer-banner-with-discount-promo-code_1017-26055.jpg', // Generic promo image
+        link: 'http://localhost:3000/shop',
+    }).catch((err) => {
+        console.error('Error broadcasting promocode notification:', err);
+    });
+
+    return promoCode;
 }
 
 const queryPromoCodes = async (filter = {}, options = {}) => {

@@ -57,8 +57,45 @@ const updateProductById = async (productId, updateBody) => {
     if (!product) {
         throw new ApiError(httpStatus.NOT_FOUND, 'Product not found');
     }
+
+    let isPriceDropped = false;
+    let newLowestPrice = Infinity;
+
+    if (updateBody.variants) {
+        updateBody.variants.forEach((newVariant) => {
+            newVariant.sizes.forEach((newSize) => {
+                // Find matching variant and size in the current product
+                const oldVariant = product.variants.find((v) => v.color.name === newVariant.color.name);
+                if (oldVariant) {
+                    const oldSize = oldVariant.sizes.find((s) => s.size === newSize.size);
+                    if (oldSize && newSize.price < oldSize.price) {
+                        isPriceDropped = true;
+                        if (newSize.price < newLowestPrice) {
+                            newLowestPrice = newSize.price;
+                        }
+                    }
+                }
+            });
+        });
+    }
+
     Object.assign(product, updateBody);
     await product.save();
+
+    if (isPriceDropped) {
+        const { broadcastNotification } = require('./pushNotification.service');
+        broadcastNotification('priceDrop', {
+            productId: product._id,
+            productName: product.name,
+            newPrice: newLowestPrice,
+            productImage: product.images[0] || (product.variants[0] && product.variants[0].color.images[0]) || '',
+            link: `http://localhost:3000/product/${product._id}`,
+        }).catch((err) => {
+            // Log error but don't fail the update request
+            console.error('Error broadcasting price drop notification:', err);
+        });
+    }
+
     return product;
 };
 

@@ -1,6 +1,7 @@
 const httpStatus = require('http-status');
-const { User, Order } = require('../models');
+const { User, Order, PromoCode } = require('../models');
 const ApiError = require('../utils/ApiError');
+const pushNotificationService = require('./pushNotification.service');
 
 /**
  * Create a user
@@ -11,7 +12,15 @@ const createUser = async (userBody) => {
   if (await User.isEmailTaken(userBody.email)) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
   }
-  return User.create(userBody);
+  const user = await User.create(userBody);
+  
+  // Notify Admins
+  pushNotificationService.notifyAdmins('adminNewUser', { 
+    fullName: user.fullName, 
+    email: user.email 
+  }).catch(err => console.error('Error notifying admins of new user:', err));
+
+  return user;
 };
 
 /**
@@ -103,17 +112,26 @@ const deleteUserById = async (userId) => {
 const upsertUserByEmail = async (userBody) => {
   let user = await getUserByEmail(userBody.email);
   if (user) {
-    const updateUser = await User.findOneAndUpdate({ email: userBody.email,newUser:false}, userBody, { new: true })
+    const updateUser = await User.findOneAndUpdate({ email: userBody.email }, userBody, { new: true })
     return updateUser;
   } else {
 
+
+    
     user = await User.create(userBody);
 
     // trigger a webpush notification to the user 
-
     // like thank you for joining us and here is a promocodes for used on first order
-    
-    
+    await pushNotificationService.triggerNotification('newUser', {}, user);
+const findAdmin=await User.findOne({role:'admin'})
+    // Notify Admins
+    await pushNotificationService.notifyAdmins('adminNewUser', { 
+      fullName: user?.fullName || "user", 
+      email: user?.email 
+    });
+
+    // find any promocode  for new user was present in db .if present then  update  that promocoed and userid will push to the promocodes user
+    await PromoCode.findOneAndUpdate({ userType: 'newUser' }, { $push: { users: user._id } });
   }
   return user;
 };

@@ -1,6 +1,7 @@
 const httpStatus = require('http-status');
 const { Order, Product, PromoCode, User } = require('../models');
 const ApiError = require('../utils/ApiError');
+const pushNotificationService = require('./pushNotification.service');
 
 /**
  * Create an order — auto-calculates totalAmount from product prices and applies promocodes
@@ -104,7 +105,19 @@ const createOrder = async (orderBody) => {
     // Update user status
     await User.updateOne({ _id: user }, { newUser: false });
 
-    return Order.create({ ...orderBody, items: enrichedItems, totalAmount, discount });
+    const order = await Order.create({ ...orderBody, items: enrichedItems, totalAmount, discount });
+
+    // Notify Admins
+    const userDoc = await User.findById(user);
+    if (userDoc) {
+        pushNotificationService.notifyAdmins('adminNewOrder', {
+            orderId: order.orderId,
+            amount: order.totalAmount,
+            userName: userDoc.fullName
+        }).catch(err => console.error('Error notifying admins of new order:', err));
+    }
+
+    return order;
 };
 
 /**
@@ -139,6 +152,13 @@ const updateOrderStatus = async (orderId, status) => {
         isCompleted: true,
     });
     await order.save();
+
+    // Trigger notification
+    const user = await User.findById(order.user);
+    if (user) {
+        await pushNotificationService.triggerNotification('orderUpdate', { status, orderId: order.orderId }, user);
+    }
+
     return order;
 };
 
@@ -163,6 +183,12 @@ const cancelOrder = async (orderId, userId) => {
     });
     await order.save();
 
+    // Trigger notification
+    const user = await User.findById(order.user);
+    if (user) {
+        await pushNotificationService.triggerNotification('orderUpdate', { status: 'Cancelled', orderId: order.orderId }, user);
+    }
+
     // Restore stock for each cancelled item
     await Promise.all(
         order.items.map(async (item) => {
@@ -186,10 +212,35 @@ const cancelOrder = async (orderId, userId) => {
 };
 
 /**
+ * Refund order (admin)
+ */
+const refundOrder = async (orderId) => {
+    const order = await Order.findById(orderId);
+    if (!order) throw new ApiError(httpStatus.NOT_FOUND, 'Order not found');
+    
+    order.status = 'Refunded';
+    order.trackingSteps.push({
+        status: 'Refunded',
+        description: 'Order refund processed',
+        date: new Date(),
+        isCompleted: true,
+    });
+    await order.save();
+
+    // Trigger notification
+    const user = await User.findById(order.user);
+    if (user) {
+        await pushNotificationService.triggerNotification('orderUpdate', { status: 'Refunded', orderId: order.orderId }, user);
+    }
+
+    return order;
+};
+
+/**
  * Get order statistics (admin)
  */
 const getOrderStats = async () => {
-    const statuses = ['Processing', 'Packed', 'Shipped', 'Out for Delivery', 'Delivered', 'Cancelled'];
+    const statuses = ['Processing', 'Packed', 'Shipped', 'Out for Delivery', 'Delivered', 'Cancelled', 'Refunded'];
     const totalOrders = await Order.countDocuments();
     const breakdown = await Promise.all(
         statuses.map(async (status) => ({
@@ -206,5 +257,6 @@ module.exports = {
     getOrderById,
     updateOrderStatus,
     cancelOrder,
+    refundOrder,
     getOrderStats,
 };

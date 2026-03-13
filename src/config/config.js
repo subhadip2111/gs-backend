@@ -23,6 +23,9 @@ const envVarsSchema = Joi.object()
     SMTP_USERNAME: Joi.string().description('username for email server'),
     SMTP_PASSWORD: Joi.string().description('password for email server'),
     EMAIL_FROM: Joi.string().description('the from field in the emails sent by the app'),
+    FIREBASE_PROJECT_ID: Joi.string().description('Firebase project ID'),
+    FIREBASE_CLIENT_EMAIL: Joi.string().description('Firebase client email'),
+    FIREBASE_PRIVATE_KEY: Joi.string().description('Firebase private key'),
   })
   .unknown();
 
@@ -60,5 +63,10 @@ module.exports = {
       },
     },
     from: envVars.EMAIL_FROM,
+  },
+  firebase: {
+    projectId: envVars.FIREBASE_PROJECT_ID,
+    clientEmail: envVars.FIREBASE_CLIENT_EMAIL,
+    privateKey: envVars.FIREBASE_PRIVATE_KEY ? envVars.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n').replace(/['"]+/g, '').trim() : undefined,
   },
 };

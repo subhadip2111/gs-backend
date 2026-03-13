@@ -14,4 +14,5 @@ module.exports.wishlistService = require('./wishlist.service');
 module.exports.addressService = require('./address.service');
 module.exports.reviewService = require('./review.service');
 module.exports.promoCodeService = require('./promocode.service');
+module.exports.pushNotificationService = require('./pushNotification.service');
 
