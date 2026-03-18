@@ -6,7 +6,7 @@ const config = require('./config/config');
 const logger = require('./config/logger');
 
 const numCPUs = os.cpus().length;
-
+console.log(numCPUs);
 if (cluster.isPrimary) {
   logger.info(`Primary process ${process.pid} is running`);
 
@@ -22,11 +22,16 @@ if (cluster.isPrimary) {
   });
 } else {
   let server;
-  mongoose.connect(config.mongoose.url, config.mongoose.options).then(() => {
+ mongoose.connect(config.mongoose.url, config.mongoose.options)
+  .then(() => {
     logger.info(`Worker ${process.pid} connected to MongoDB`);
     server = app.listen(config.port, () => {
-      logger.info(`Worker ${process.pid} listening to port ${config.port}`);
+      logger.info(`Worker ${process.pid} listening on ${config.port}`);
     });
+  })
+  .catch((err) => {
+    logger.error('MongoDB connection failed:', err);
+    process.exit(1);
   });
 
   const exitHandler = () => {

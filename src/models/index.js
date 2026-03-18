@@ -8,3 +8,4 @@ module.exports.Banner = require('./banner.model');
 module.exports.Brand = require('./brand.model');
 module.exports.Review = require('./review.model');
 module.exports.PromoCode = require('./promocode.model');
+module.exports.PlatformReview = require('./platform.reviewed');

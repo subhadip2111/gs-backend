@@ -11,3 +11,4 @@ module.exports.wishlistValidation = require('./wishlist.validation');
 module.exports.addressValidation = require('./address.validation');
 module.exports.promoCodeValidation = require('./promocode.validation');
 module.exports.adminValidation = require('./admin.validation');
+module.exports.platformReviewValidation = require('./platform.reviewed.validation');

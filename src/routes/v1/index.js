@@ -14,6 +14,7 @@ const wishlistRoute = require('./wishlist.route');
 const addressRoute = require('./address.route');
 const uploadRoute = require('./upload.route');
 const promoCodeRoute = require('./promocode.route');
+const platformReviewRoute = require('./platform.reviewed.route');
 const config = require('../../config/config');
 
 const router = express.Router();
@@ -74,6 +75,10 @@ const defaultRoutes = [
   {
     path: '/promocodes',
     route: promoCodeRoute,
+  },
+  {
+    path: '/platform-reviews',
+    route: platformReviewRoute,
   },
 ];
 

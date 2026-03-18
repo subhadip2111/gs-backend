@@ -11,3 +11,4 @@ module.exports.cartController = require('./cart.controller');
 module.exports.wishlistController = require('./wishlist.controller');
 module.exports.addressController = require('./address.controller');
 module.exports.promoCodeController = require('./promocode.controller');
+module.exports.platformReviewController = require('./platform.reviewed.controller');
