@@ -25,6 +25,7 @@ const createOrder = {
         }),
         paymentMethod: Joi.string().valid('COD', 'Prepaid').default('COD'),
         couponCode: Joi.string(),
+        status:Joi.string().valid('Processing', 'Packed', 'Shipped', 'Out for Delivery', 'Delivered', 'Cancelled','Returned','pre-order').default('pre-order'),
         discount: Joi.number().default(0),
     }),
 };
