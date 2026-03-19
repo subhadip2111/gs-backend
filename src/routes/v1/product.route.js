@@ -24,12 +24,13 @@ const router = express.Router();
 router
     .route('/')
     .post(auth('manageUsers'), validate(productValidation.createProduct), productController.createProduct) // Admin only
-    .get(validate(productValidation.getProducts), productController.getProducts);
+    .get(auth(), validate(productValidation.getProducts), productController.getProducts);
 
 router.get('/trending', productController.getTrendingProducts);
 router.get('/new-arrivals', productController.getNewArrivals);
 router.get('/stats', auth('getUsers'), productController.getStats);
 router.get('/:productId/similar', validate(productValidation.getProduct), productController.getSimilarProducts);
+router.get('/:productId/ai-recommendations', validate(productValidation.getProduct), productController.getAiRecommendations);
 
 router
     .route('/:productId')

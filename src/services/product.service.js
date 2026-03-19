@@ -123,10 +123,17 @@ const getSimilarProducts = async (productId) => {
     if (!product) {
         throw new ApiError(httpStatus.NOT_FOUND, 'Product not found');
     }
+
+    // Apply the same "Upselling" logic (higher price items) to the similar products API
+    const basePrice = product.variants[0]?.sizes[0]?.price || 0;
+    const minPrice = basePrice * 1.01; // Slightly more expensive
+    const maxPrice = basePrice * 3.0; // Up to 3x price for premium alternatives
+
     return Product.find({
         category: product.category,
         subcategory: product.subcategory,
         _id: { $ne: productId },
+        "variants.sizes.price": { $gte: minPrice, $lte: maxPrice }
     })
         .limit(10)
         .populate('category')

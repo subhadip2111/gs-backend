@@ -16,3 +16,4 @@ module.exports.reviewService = require('./review.service');
 module.exports.promoCodeService = require('./promocode.service');
 module.exports.pushNotificationService = require('./pushNotification.service');
 module.exports.platformReviewService = require('./platform.reviewed.service');
+module.exports.aiService = require('./ai.service');

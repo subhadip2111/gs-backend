@@ -26,6 +26,8 @@ const envVarsSchema = Joi.object()
     FIREBASE_PROJECT_ID: Joi.string().description('Firebase project ID'),
     FIREBASE_CLIENT_EMAIL: Joi.string().description('Firebase client email'),
     FIREBASE_PRIVATE_KEY: Joi.string().description('Firebase private key'),
+  
+    GROQ_API_KEY: Joi.string().description('Groq API key'),
   })
   .unknown();
 
@@ -68,5 +70,9 @@ module.exports = {
     projectId: envVars.FIREBASE_PROJECT_ID,
     clientEmail: envVars.FIREBASE_CLIENT_EMAIL,
     privateKey: envVars.FIREBASE_PRIVATE_KEY ? envVars.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n').replace(/['"]+/g, '').trim() : undefined,
+  },
+ 
+  groq: {
+    apiKey: envVars.GROQ_API_KEY,
   },
 };

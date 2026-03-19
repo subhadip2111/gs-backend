@@ -49,6 +49,7 @@
     "prettier"
   ],
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "bcryptjs": "^2.4.3",
     "buffer-equal-constant-time": "^1.0.1",
     "cloudinary": "^2.9.0",
@@ -68,7 +69,9 @@
     "mongoose": "^5.7.7",
     "morgan": "^1.9.1",
     "multer": "^2.0.2",
+    "node-cache": "^5.1.2",
     "nodemailer": "^6.3.1",
+    "openai": "^6.32.0",
     "passport": "^0.4.0",
     "passport-jwt": "^4.0.0",
     "pm2": "^5.1.0",

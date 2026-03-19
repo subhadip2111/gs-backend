@@ -42,7 +42,17 @@ const productSchema = mongoose.Schema(
 // add plugin that converts mongoose to json
 productSchema.plugin(toJSON);
 productSchema.plugin(paginate);
+productSchema.index({
+  name: "text",
+  description: "text",
+});
 
+productSchema.index({ isTrending: 1, createdAt: -1 });
+productSchema.index({ isBestSeller: 1 });
+productSchema.index({ isNewArrival: 1 });
+
+productSchema.index({ category: 1, isTrending: 1, createdAt: -1 });
+productSchema.index({ brand: 1, category: 1 });
 const Product = mongoose.model('Product', productSchema);
 
 module.exports = Product;
