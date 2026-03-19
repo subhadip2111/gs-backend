@@ -6,18 +6,33 @@ const config = require('./config/config');
 const logger = require('./config/logger');
 
 const numCPUs = os.cpus().length;
-const totalMemoryGB = os.totalmem() / (1024 * 1024 * 1024);
+
+// ⚠️ IMPORTANT: Render doesn't expose real memory via os.totalmem()
+// So we rely on ENV or safe defaults
+const MEMORY_LIMIT_MB = process.env.MEMORY_LIMIT_MB
+  ? parseInt(process.env.MEMORY_LIMIT_MB)
+  : 512; // 👈 default assume low memory (safe)
+
+// 🚀 Smart cluster decision
+const SHOULD_USE_CLUSTER =
+  process.env.CLUSTER === 'true' && // manual control
+  numCPUs > 1 &&
+  MEMORY_LIMIT_MB >= 2048; // only allow if 2GB+
+
+// 👇 Limit workers to avoid memory crash
+const WORKERS = SHOULD_USE_CLUSTER
+  ? Math.min(numCPUs, 2) // 👈 never spawn too many
+  : 1;
 
 console.log(`CPUs: ${numCPUs}`);
-console.log(`Memory: ${totalMemoryGB.toFixed(2)} GB`);
-
-// 🚀 CONDITION: Disable cluster for low resources
-const SHOULD_USE_CLUSTER = numCPUs > 1 && totalMemoryGB >= 2;
+console.log(`Memory Limit: ${MEMORY_LIMIT_MB} MB`);
+console.log(`Cluster Enabled: ${SHOULD_USE_CLUSTER}`);
+console.log(`Workers: ${WORKERS}`);
 
 if (cluster.isPrimary && SHOULD_USE_CLUSTER) {
   logger.info(`Primary process ${process.pid} is running`);
 
-  for (let i = 0; i < numCPUs; i++) {
+  for (let i = 0; i < WORKERS; i++) {
     cluster.fork();
   }
 
@@ -27,10 +42,14 @@ if (cluster.isPrimary && SHOULD_USE_CLUSTER) {
   });
 
 } else {
-  // 👉 Single process OR worker process
+  // 👉 Single process OR worker
   let server;
 
-  mongoose.connect(config.mongoose.url, config.mongoose.options)
+  mongoose.connect(config.mongoose.url, {
+    ...config.mongoose.options,
+    maxPoolSize: 5,   // 👈 reduce memory usage
+    minPoolSize: 1,
+  })
     .then(() => {
       logger.info(`Process ${process.pid} connected to MongoDB`);
 
